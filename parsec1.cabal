@@ -19,6 +19,11 @@ description:
 
 build-type:     Simple
 cabal-version:      >= 1.6
+
+source-repository head
+  type: git
+  location: https://github.com/cmaeder/parsec1
+
 library {
   exposed-modules:
     Text.ParserCombinators.Parsec.Error,
