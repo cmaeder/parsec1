@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Text.ParserCombinators.Parsec.Prim
@@ -44,8 +45,9 @@ import Text.ParserCombinators.Parsec.Pos
 import Text.ParserCombinators.Parsec.Error
 import Control.Applicative
 import Control.Monad
+#if __GLASGOW_HASKELL__ >= 801
 import Control.Monad.Fail
-
+#endif
 -----------------------------------------------------------
 -- Operators:
 -- <?>  gives a name to a parser (which is used in error messages)
@@ -237,12 +239,14 @@ parsecMap f (Parser p)
 -----------------------------------------------------------
 -- Monad: return, sequence (>>=) and fail
 -----------------------------------------------------------
-instance MonadFail (GenParser tok st) where
-  fail = parsecFail
-
 instance Monad (GenParser tok st) where
   return x   = parsecReturn x
   p >>= f    = parsecBind p f
+
+#if __GLASGOW_HASKELL__ >= 801
+instance MonadFail (GenParser tok st) where
+#endif
+  fail = parsecFail
 
 instance Applicative (GenParser tok st) where
   pure = return

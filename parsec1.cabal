@@ -24,7 +24,7 @@ source-repository head
   type: git
   location: https://github.com/cmaeder/parsec1
 
-library {
+library
   exposed-modules:
     Text.ParserCombinators.Parsec.Error,
     Text.ParserCombinators.Parsec.Char,
@@ -32,5 +32,5 @@ library {
     Text.ParserCombinators.Parsec.Pos,
     Text.ParserCombinators.Parsec.Prim,
     Text.ParserCombinators.Parsec
-  build-depends:    base >= 4.9 && < 5
-}
+  build-depends:    base < 5
+  other-extensions: CPP
