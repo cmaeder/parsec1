@@ -1,0 +1,5 @@
+dist: focal
+language: haskell
+ghc:
+  - "8.10"
+  - "7.0.1"
