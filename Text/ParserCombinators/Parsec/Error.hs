@@ -60,7 +60,7 @@ data Message        = SysUnExpect !String   --library generated unexpect
                     | UnExpect    !String   --unexpected something
                     | Expect      !String   --expecting something
                     | Message     !String   --raw message
-
+                    deriving Eq
 messageToEnum msg
     = case msg of SysUnExpect _ -> 0
                   UnExpect _    -> 1
@@ -89,7 +89,7 @@ messageEq msg1 msg2
 -- and a list of error messages ('Message'). A @ParseError@
 -- can be returned by the function 'Text.Parsec.Prim.parse'. @ParseError@ is an
 -- instance of the 'Show' class.
-data ParseError     = ParseError !SourcePos [Message]
+data ParseError     = ParseError !SourcePos [Message] deriving Eq
 
 -- | Extracts the source position from the parse error
 errorPos :: ParseError -> SourcePos
@@ -195,4 +195,3 @@ showErrorMessages msgOr msgUnknown msgExpecting msgUnExpected msgEndOfInput msgs
       seperate sep (m:ms) = m ++ sep ++ seperate sep ms
 
       clean             = nub . filter (not.null)
-
