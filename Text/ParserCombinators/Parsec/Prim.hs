@@ -240,8 +240,9 @@ parsecMap f (Parser p)
 -- Monad: return, sequence (>>=) and fail
 -----------------------------------------------------------
 instance Monad (GenParser tok st) where
-  return x   = parsecReturn x
-  p >>= f    = parsecBind p f
+  return = parsecReturn
+  (>>=) = parsecBind
+  (>>) = (*>)
 
 #if __GLASGOW_HASKELL__ >= 801
 instance MonadFail (GenParser tok st) where
@@ -249,8 +250,10 @@ instance MonadFail (GenParser tok st) where
   fail = parsecFail
 
 instance Applicative (GenParser tok st) where
-  pure = return
+  pure = parsecReturn
   (<*>) = ap
+  p1 *> p2 = p1 >>= const p2
+  p1 <* p2 = p1 >>= (<$ p2)
 
 parsecReturn :: a -> GenParser tok st a
 parsecReturn x
