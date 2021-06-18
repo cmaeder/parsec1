@@ -38,7 +38,7 @@ import Text.ParserCombinators.Parsec.Prim
 -- until one of them succeeds. Returns the value of the succeeding
 -- parser.
 choice :: [GenParser tok st a] -> GenParser tok st a
-choice ps           = foldr (<|>) mzero ps
+choice = foldr (<|>) mzero
 
 -- | @option x p@ tries to apply parser @p@. If @p@ fails without
 -- consuming input, it returns the value @x@, otherwise the value
@@ -54,13 +54,13 @@ option x p          = p <|> return x
 -- consuming input, it return 'Nothing', otherwise it returns
 -- 'Just' the value returned by @p@.
 optionMaybe :: GenParser tok st a -> GenParser tok st (Maybe a)
-optionMaybe p       = option Nothing (liftM Just p)
+optionMaybe p       = option Nothing (fmap Just p)
 
 -- | @optional p@ tries to apply parser @p@.  It will parse @p@ or nothing.
 -- It only fails if @p@ fails after consuming input. It discards the result
 -- of @p@.
 optional :: GenParser tok st a -> GenParser tok st ()
-optional p          = do{ p; return ()} <|> return ()
+optional p          = p >> return () <|> return ()
 
 -- | @between open close p@ parses @open@, followed by @p@ and @close@.
 -- Returns the value returned by @p@.
@@ -68,14 +68,12 @@ optional p          = do{ p; return ()} <|> return ()
 -- >  braces  = between (symbol "{") (symbol "}")
 between :: GenParser tok st open -> GenParser tok st close
             -> GenParser tok st a -> GenParser tok st a
-between open close p
-                    = do{ open; x <- p; close; return x }
-
+between open close p = open *> p <* close
 
 -- | @skipMany1 p@ applies the parser @p@ /one/ or more times, skipping
 -- its result.
 skipMany1 :: GenParser tok st a -> GenParser tok st ()
-skipMany1 p         = do{ p; skipMany p }
+skipMany1 p         = p *> skipMany p
 {-
 skipMany p          = scan
                     where
@@ -117,8 +115,7 @@ sepBy1 p sep        = do{ x <- p
 -- returned by @p@.
 sepEndBy1 :: GenParser tok st a -> GenParser tok st sep -> GenParser tok st [a]
 sepEndBy1 p sep     = do{ x <- p
-                        ; do{ sep
-                            ; xs <- sepEndBy p sep
+                        ; do{ xs <- sep *> sepEndBy p sep
                             ; return (x:xs)
                             }
                           <|> return [x]
@@ -136,21 +133,21 @@ sepEndBy p sep      = sepEndBy1 p sep <|> return []
 -- | @endBy1 p sep@ parses /one/ or more occurrences of @p@, seperated
 -- and ended by @sep@. Returns a list of values returned by @p@.
 endBy1 :: GenParser tok st a -> GenParser tok st sep -> GenParser tok st [a]
-endBy1 p sep        = many1 (do{ x <- p; sep; return x })
+endBy1 p sep        = many1 (p <* sep)
 
 -- | @endBy p sep@ parses /zero/ or more occurrences of @p@, seperated
 -- and ended by @sep@. Returns a list of values returned by @p@.
 --
 -- >   cStatements  = cStatement `endBy` semi
 endBy :: GenParser tok st a -> GenParser tok st sep -> GenParser tok st [a]
-endBy p sep         = many (do{ x <- p; sep; return x })
+endBy p sep         = many (p <* sep)
 
 -- | @count n p@ parses @n@ occurrences of @p@. If @n@ is smaller or
 -- equal to zero, the parser equals to @return []@. Returns a list of
 -- @n@ values returned by @p@.
 count :: Int -> GenParser tok st a -> GenParser tok st [a]
 count n p           | n <= 0    = return []
-                    | otherwise = sequence (replicate n p)
+                    | otherwise = replicateM n p
 
 
 -- | @chainr p op x@ parser /zero/ or more occurrences of @p@,
@@ -203,8 +200,7 @@ chainr1 p op        = scan
                       scan      = do{ x <- p; rest x }
 
                       rest x    = do{ f <- op
-                                    ; y <- scan
-                                    ; return (f x y)
+                                    ; f x <$> scan
                                     }
                                 <|> return x
 
@@ -215,7 +211,7 @@ chainr1 p op        = scan
 -- | The parser @anyToken@ accepts any kind of token. It is for example
 -- used to implement 'eof'. Returns the accepted token.
 anyToken :: Show tok => GenParser tok st tok
-anyToken            = tokenPrim show (\pos tok toks -> pos) Just
+anyToken            = tokenPrim show (\pos _tok _toks -> pos) Just
 
 -- | This parser only succeeds at the end of the input. This is not a
 -- primitive parser but it is defined using 'notFollowedBy'.
@@ -253,6 +249,6 @@ notFollowedBy p     = try (do{ c <- p; unexpected (show c) }
 manyTill :: GenParser tok st a -> GenParser tok st end -> GenParser tok st [a]
 manyTill p end      = scan
                     where
-                      scan  = do{ end; return [] }
+                      scan  = end >> return []
                             <|>
                               do{ x <- p; xs <- scan; return (x:xs) }
