@@ -375,14 +375,14 @@ try (Parser p)
         case (p state) of
           Consumed (Error err)  -> Empty (Error err)
           Consumed ok           -> Consumed ok    -- was: Empty ok
-          empty                 -> empty
+          mty                   -> mty
       )
 
 -- | @lookAhead p@ parses @p@ without consuming any input.
 lookAhead :: GenParser tok st a -> GenParser tok st a
 lookAhead p         = do{ state <- getParserState
                         ; x <- p'
-                        ; setParserState state
+                        ; _ <- setParserState state
                         ; return x
                         }
   where p' = Parser $ \ state -> case runP p state of
@@ -406,11 +406,11 @@ lookAhead p         = do{ state <- getParserState
 -- >      posFromTok (pos,t)  = pos
 -- >      testTok (pos,t)     = if x == t then Just t else Nothing
 token :: (tok -> String) -> (tok -> SourcePos) -> (tok -> Maybe a) -> GenParser tok st a
-token show tokpos test
-  = tokenPrim show nextpos test
+token shw tokpos test
+  = tokenPrim shw nextpos test
   where
-    nextpos _ _   (tok:toks)  = tokpos tok
-    nextpos _ tok []          = tokpos tok
+    nextpos _ _   (tok : _)  = tokpos tok
+    nextpos _ tok []         = tokpos tok
 
 -- | The parser @token showTok nextPos testTok@ accepts a token @t@
 -- with result @x@ when the function @testTok t@ returns @'Just' x@. The
@@ -429,8 +429,8 @@ token show tokpos test
 -- >      testChar x        = if x == c then Just x else Nothing
 -- >      nextPos pos x xs  = updatePosChar pos x
 tokenPrim :: (tok -> String) -> (SourcePos -> tok -> [tok] -> SourcePos) -> (tok -> Maybe a) -> GenParser tok st a
-tokenPrim show nextpos test
-    = tokenPrimEx show nextpos Nothing test
+tokenPrim shw nextpos test
+    = tokenPrimEx shw nextpos Nothing test
 
 -- | The most primitive token recogniser. The expression @tokenPrimEx show nextpos mbnextstate test@,
 -- recognises tokens when @test@ returns @Just x@ (and returns the value @x@). Tokens are shown in
@@ -442,21 +442,21 @@ tokenPrimEx :: (tok -> String) ->
                Maybe (SourcePos -> tok -> [tok] -> st -> st) ->
                (tok -> Maybe a) ->
                GenParser tok st a
-tokenPrimEx show nextpos mbNextState test
+tokenPrimEx shw nextpos mbNextState test
     = case mbNextState of
         Nothing
-          -> Parser (\state@(State input pos user) ->
+          -> Parser (\ (State input pos user) ->
               case input of
                 (c:cs) -> case test c of
                             Just x  -> let newpos   = nextpos pos c cs
                                            newstate = State cs newpos user
                                        in seq newpos $ seq newstate $
                                           Consumed (Ok x newstate (newErrorUnknown newpos))
-                            Nothing -> Empty (sysUnExpectError (show c) pos)
+                            Nothing -> Empty (sysUnExpectError (shw c) pos)
                 []     -> Empty (sysUnExpectError "" pos)
              )
         Just nextState
-          -> Parser (\state@(State input pos user) ->
+          -> Parser (\ (State input pos user) ->
               case input of
                 (c:cs) -> case test c of
                             Just x  -> let newpos   = nextpos pos c cs
@@ -464,7 +464,7 @@ tokenPrimEx show nextpos mbNextState test
                                            newstate = State cs newpos newuser
                                        in seq newpos $ seq newstate $
                                           Consumed (Ok x newstate (newErrorUnknown newpos))
-                            Nothing -> Empty (sysUnExpectError (show c) pos)
+                            Nothing -> Empty (sysUnExpectError (shw c) pos)
                 []     -> Empty (sysUnExpectError "" pos)
              )
 
@@ -504,12 +504,16 @@ unexpected msg
     = Parser (\state -> Empty (Error (newErrorMessage (UnExpect msg) (statePos state))))
 
 
+setExpectErrors :: ParseError -> [String] -> ParseError
 setExpectErrors err []         = setErrorMessage (Expect "") err
 setExpectErrors err [msg]      = setErrorMessage (Expect msg) err
-setExpectErrors err (msg:msgs) = foldr (\msg err -> addErrorMessage (Expect msg) err)
+setExpectErrors err (msg:msgs) = foldr (\m es -> addErrorMessage (Expect m) es)
                                        (setErrorMessage (Expect msg) err) msgs
 
+sysUnExpectError :: String -> SourcePos -> Reply tok st a
 sysUnExpectError msg pos  = Error (newErrorMessage (SysUnExpect msg) pos)
+
+unknownError :: State tok st -> ParseError
 unknownError state        = newErrorUnknown (statePos state)
 
 -----------------------------------------------------------
@@ -536,23 +540,20 @@ manyAux p
 --
 -- >  spaces  = skipMany space
 skipMany :: GenParser tok st a -> GenParser tok st ()
-skipMany p
-  = do{ manyAccum (\x xs -> []) p
-      ; return ()
-      }
+skipMany p = manyAccum (\ _ _ -> []) p >> return ()
 
 manyAccum :: (a -> [a] -> [a]) -> GenParser tok st a -> GenParser tok st [a]
 manyAccum accum (Parser p)
   = Parser (\state ->
-    let walk xs state r = case r of
-                           Empty (Error err)          -> Ok xs state err
-                           Empty ok                   -> error "Text.ParserCombinators.Parsec.Prim.many: combinator 'many' is applied to a parser that accepts an empty string."
+    let walk xs st r = case r of
+                           Empty (Error err)          -> Ok xs st err
+                           Empty _                    -> error "Text.ParserCombinators.Parsec.Prim.many: combinator 'many' is applied to a parser that accepts an empty string."
                            Consumed (Error err)       -> Error err
-                           Consumed (Ok x state' err) -> let ys = accum x xs
+                           Consumed (Ok x state' _)   -> let ys = accum x xs
                                                          in seq ys (walk ys state' (p state'))
     in case (p state) of
          Empty reply  -> case reply of
-                           Ok x state' err -> error "Text.ParserCombinators.Parsec.Prim.many: combinator 'many' is applied to a parser that accepts an empty string."
+                           Ok {} -> error "Text.ParserCombinators.Parsec.Prim.many: combinator 'many' is applied to a parser that accepts an empty string."
                            Error err       -> Empty (Ok [] state err)
          consumed     -> Consumed $ walk [] state consumed)
 
@@ -575,26 +576,26 @@ tokens showss nextposs s
 -}
 
 tokens :: Eq tok => ([tok] -> String) -> (SourcePos -> [tok] -> SourcePos) -> [tok] -> GenParser tok st [tok]
-tokens shows nextposs s
-    = Parser (\state@(State input pos user) ->
+tokens shws nextposs s
+    = Parser (\ (State input pos user) ->
        let
         ok cs             = let newpos   = nextposs pos s
                                 newstate = State cs newpos user
                             in seq newpos $ seq newstate $
                                (Ok s newstate (newErrorUnknown newpos))
 
-        errEof            = Error (setErrorMessage (Expect (shows s))
+        errEof            = Error (setErrorMessage (Expect (shws s))
                                      (newErrorMessage (SysUnExpect "") pos))
-        errExpect r       = Error $ setErrorMessage (Expect (shows s))
-            $ newErrorMessage (SysUnExpect $ shows $ reverse r) pos
+        errExpect r       = Error $ setErrorMessage (Expect (shws s))
+            $ newErrorMessage (SysUnExpect $ shws $ reverse r) pos
 
         walk _ [] cs        = ok cs
-        walk r xs []        = errExpect r
+        walk r _xs []        = errExpect r
         walk r (x:xs) (c:cs)| x == c        = walk (x : r) xs cs
                           | otherwise     = errExpect $ c : r
 
         walk1 [] cs        = Empty (ok cs)
-        walk1 xs []        = Empty (errEof)
+        walk1 _xs []        = Empty (errEof)
         walk1 (x:xs) (c:cs)| x == c        = Consumed (walk [x] xs cs)
                            | otherwise     = Empty (errExpect [c] )
 
