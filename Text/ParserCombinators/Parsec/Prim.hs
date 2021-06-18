@@ -15,7 +15,7 @@
 
 module Text.ParserCombinators.Parsec.Prim
                    ( -- operators: label a parser, alternative
-                     (<?>), (<|>)
+                     (<?>), (<|>), (*>), (<*), (<*>), (<$>), (<$)
 
                    -- basic types
                    , Parser, GenParser
