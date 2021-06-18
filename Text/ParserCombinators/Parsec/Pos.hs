@@ -40,46 +40,47 @@ data SourcePos      = SourcePos SourceName !Line !Column
 -- | Create a new 'SourcePos' with the given source name,
 -- line number and column number.
 newPos :: SourceName -> Line -> Column -> SourcePos
-newPos sourceName line column
-    = SourcePos sourceName line column
+newPos = SourcePos
 
 -- | Create a new 'SourcePos' with the given source name,
 -- and line number and column number set to 1, the upper left.
 initialPos :: SourceName -> SourcePos
-initialPos sourceName
-    = newPos sourceName 1 1
+initialPos name
+    = newPos name 1 1
 
 -- | Extracts the name of the source from a source position.
 sourceName :: SourcePos -> SourceName
-sourceName (SourcePos name line column) = name
+sourceName (SourcePos name _line _column) = name
 
 -- | Extracts the line number from a source position.
 sourceLine :: SourcePos -> Line
-sourceLine (SourcePos name line column) = line
+sourceLine (SourcePos _name line _column) = line
 
 -- | Extracts the column number from a source position.
 sourceColumn :: SourcePos -> Column
-sourceColumn (SourcePos name line column) = column
+sourceColumn (SourcePos _name _line column) = column
 
 -- | Increments the line number of a source position.
 incSourceLine :: SourcePos -> Line -> SourcePos
-incSourceLine (SourcePos name line column) n = SourcePos name (line+n) column
+incSourceLine (SourcePos name line column) n
+    = SourcePos name (line + n) column
 
 -- | Increments the column number of a source position.
 incSourceColumn :: SourcePos -> Column -> SourcePos
-incSourceColumn (SourcePos name line column) n = SourcePos name line (column+n)
+incSourceColumn (SourcePos name line column) n
+    = SourcePos name line (column + n)
 
 -- | Set the name of the source.
 setSourceName :: SourcePos -> SourceName -> SourcePos
-setSourceName (SourcePos name line column) n = SourcePos n line column
+setSourceName (SourcePos _name line column) n = SourcePos n line column
 
 -- | Set the line number of a source position.
 setSourceLine :: SourcePos -> Line -> SourcePos
-setSourceLine (SourcePos name line column) n = SourcePos name n column
+setSourceLine (SourcePos name _line column) n = SourcePos name n column
 
 -- | Set the column number of a source position.
 setSourceColumn :: SourcePos -> Column -> SourcePos
-setSourceColumn (SourcePos name line column) n = SourcePos name line n
+setSourceColumn (SourcePos name line _column) = SourcePos name line
 
 -- | The expression @updatePosString pos s@ updates the source position
 -- @pos@ by calling 'updatePosChar' on every character in @s@, ie.
@@ -89,17 +90,17 @@ updatePosString pos string
     = forcePos (foldl updatePosChar pos string)
 
 updatePosChar   :: SourcePos -> Char -> SourcePos
-updatePosChar pos@(SourcePos name line column) c
+updatePosChar (SourcePos name line column) c
     = forcePos $
       case c of
-        '\n' -> SourcePos name (line+1) 1
+        '\n' -> SourcePos name (line + 1) 1
         '\t' -> SourcePos name line (column + 8 - ((column-1) `mod` 8))
         _    -> SourcePos name line (column + 1)
 
 
 forcePos :: SourcePos -> SourcePos
-forcePos pos@(SourcePos name line column)
-    = seq line (seq column (pos))
+forcePos pos@(SourcePos _name line column)
+    = seq line (seq column pos)
 
 -----------------------------------------------------------
 -- Show positions
