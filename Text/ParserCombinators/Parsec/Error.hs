@@ -61,6 +61,8 @@ data Message        = SysUnExpect !String   --library generated unexpect
                     | Expect      !String   --expecting something
                     | Message     !String   --raw message
                     deriving Eq
+
+messageToEnum :: Message -> Int
 messageToEnum msg
     = case msg of SysUnExpect _ -> 0
                   UnExpect _    -> 1
@@ -81,7 +83,7 @@ messageString msg
 
 messageEq :: Message -> Message -> Bool
 messageEq msg1 msg2
-    = (messageCompare msg1 msg2 == EQ)
+    = messageCompare msg1 msg2 == EQ
 
 
 -- | The abstract data type @ParseError@ represents parse errors. It
@@ -93,16 +95,16 @@ data ParseError     = ParseError !SourcePos [Message] deriving Eq
 
 -- | Extracts the source position from the parse error
 errorPos :: ParseError -> SourcePos
-errorPos (ParseError pos msgs)
+errorPos (ParseError pos _msgs)
     = pos
 
 -- | Extracts the list of error messages from the parse error
 errorMessages :: ParseError -> [Message]
-errorMessages (ParseError pos msgs)
+errorMessages (ParseError _pos msgs)
     = sortBy messageCompare msgs
 
 errorIsUnknown :: ParseError -> Bool
-errorIsUnknown (ParseError pos msgs)
+errorIsUnknown (ParseError _pos msgs)
     = null msgs
 
 
@@ -158,7 +160,7 @@ showErrorMessages ::
     String -> String -> String -> String -> String -> [Message] -> String
 showErrorMessages msgOr msgUnknown msgExpecting msgUnExpected msgEndOfInput msgs
     | null msgs = msgUnknown
-    | otherwise = concat $ map ("\n"++) $ clean $
+    | otherwise = concatMap ("\n"++) $ clean
                  [showSysUnExpect,showUnExpect,showExpect,showMessages]
     where
       (sysUnExpect,msgs1)   = span (messageEq (SysUnExpect "")) msgs
@@ -176,22 +178,22 @@ showErrorMessages msgOr msgUnknown msgExpecting msgUnExpected msgEndOfInput msgs
 
       showMessages      = showMany "" messages
 
-
       --helpers
-      showMany pre msgs = case (clean (map messageString msgs)) of
+      showMany pre es = case clean (map messageString es) of
                             [] -> ""
                             ms | null pre  -> commasOr ms
                                | otherwise -> pre ++ " " ++ commasOr ms
 
-      commasOr []       = ""
-      commasOr [m]      = m
-      commasOr ms       = commaSep (init ms) ++ " " ++ msgOr ++ " " ++ last ms
+      commasOr ms       = case ms of
+        [] -> ""
+        [m] -> m
+        _ -> commaSep (init ms) ++ " " ++ msgOr ++ " " ++ last ms
 
       commaSep          = seperate ", " . clean
-      semiSep           = seperate "; " . clean
 
-      seperate sep []   = ""
-      seperate sep [m]  = m
-      seperate sep (m:ms) = m ++ sep ++ seperate sep ms
+      seperate sep ms = case ms of
+        [] -> ""
+        [m] -> m
+        m : rs -> m ++ sep ++ seperate sep rs
 
-      clean             = nub . filter (not.null)
+      clean             = nub . filter (not . null)
