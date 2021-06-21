@@ -166,7 +166,7 @@ chainl p op x = chainl1 p op <|> return x
 {- | @chainl1 p op x@ parser /one/ or more occurrences of @p@,
 separated by @op@ Returns a value obtained by a /left/ associative
 application of all functions returned by @op@ to the values returned
-by @p@. . This parser can for example be used to eliminate left
+by @p@. This parser can for example be used to eliminate left
 recursion which typically occurs in expression grammars.
 
 >  expr    = term   `chainl1` addop
@@ -231,9 +231,7 @@ by a legal identifier character, in which case the keyword is
 actually an identifier (for example @lets@). We can program this
 behaviour as follows:
 
->  keywordLet  = try (do{ string "let"
->                       ; notFollowedBy alphaNum
->                       }) -}
+>  keywordLet  = try (string "let" <* notFollowedBy alphaNum) -}
 notFollowedBy :: Show a => GenParser tok st a -> GenParser tok st ()
 notFollowedBy p = try $ do
     c <- p
@@ -246,7 +244,7 @@ This parser can be used to scan comments:
 
 >  simpleComment   = string "<!--" *> manyTill anyChar (try (string "-->"))
 
-Note the overlapping parsers @anyChar@ and @string \"<!--\"@, and
+Note the overlapping parsers @anyChar@ and @string \"-->\"@, and
 therefore the use of the 'try' combinator. -}
 manyTill :: GenParser tok st a -> GenParser tok st end -> GenParser tok st [a]
 manyTill p end = scan where
