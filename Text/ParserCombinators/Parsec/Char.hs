@@ -7,9 +7,8 @@ Maintainer  :  Antoine Latter <aslatter@gmail.com>
 Stability   :  provisional
 Portability :  portable
 
-Commonly used character parsers.
-
---------------------------------------------------------------------------- -}
+Commonly used character parsers
+-}
 
 module Text.ParserCombinators.Parsec.Char
   ( CharParser

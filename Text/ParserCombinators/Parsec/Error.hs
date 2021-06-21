@@ -8,8 +8,7 @@ Stability   :  provisional
 Portability :  portable
 
 Parse errors
-
---------------------------------------------------------------------------- -}
+-}
 
 module Text.ParserCombinators.Parsec.Error
   ( Message (SysUnExpect, UnExpect, Expect, Message)

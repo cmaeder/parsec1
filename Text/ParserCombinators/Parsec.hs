@@ -22,8 +22,7 @@ Predictive parser combinators need four values to report errors.
 Journal of Functional Programming 6(2): 355-364, 1996
 
 This helper module exports elements from the basic libraries.
-
---------------------------------------------------------------------------- -}
+-}
 
 module Text.ParserCombinators.Parsec
   ( -- complete modules

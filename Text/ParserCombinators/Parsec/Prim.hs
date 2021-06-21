@@ -9,8 +9,7 @@ Stability   :  provisional
 Portability :  portable
 
 The primitive parser combinators.
-
---------------------------------------------------------------------------- -}
+-}
 
 module Text.ParserCombinators.Parsec.Prim
   ( -- operators: label a parser, alternative
@@ -71,6 +70,7 @@ infix 0 <?>
 {- | The parser @p <?> msg@ behaves as parser @p@, but whenever the
 parser @p@ fails /without consuming any input/, it replaces expect
 error messages with the expect error message @msg@.
+
 This is normally used at the end of a set alternatives where we want
 to return an error message in terms of a higher level construct
 rather than returning all possible characters. For example, if the

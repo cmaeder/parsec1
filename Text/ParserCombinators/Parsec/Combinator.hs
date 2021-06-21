@@ -8,8 +8,7 @@ Stability   :  provisional
 Portability :  portable
 
 Commonly used generic combinators
-
---------------------------------------------------------------------------- -}
+-}
 
 module Text.ParserCombinators.Parsec.Combinator
   ( between

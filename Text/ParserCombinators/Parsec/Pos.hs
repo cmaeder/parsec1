@@ -7,9 +7,8 @@ Maintainer  :  Antoine Latter <aslatter@gmail.com>
 Stability   :  provisional
 Portability :  portable
 
-Textual source positions.
-
---------------------------------------------------------------------------- -}
+Textual source positions
+-}
 
 module Text.ParserCombinators.Parsec.Pos
   ( Column
