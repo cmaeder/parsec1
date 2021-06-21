@@ -235,11 +235,14 @@ instance Monad (GenParser tok st) where
   return = parsecReturn
   (>>=) = parsecBind
   (>>) = (*>)
+#if !MIN_VERSION_base(4,13,0)
+  fail = parsecFail
+#endif
 
 #if __GLASGOW_HASKELL__ >= 801
 instance MonadFail (GenParser tok st) where
-#endif
   fail = parsecFail
+#endif
 
 instance Applicative (GenParser tok st) where
   pure = parsecReturn
@@ -340,14 +343,9 @@ try (Parser p) = Parser $ \ state -> case p state of
 
 -- | @lookAhead p@ parses @p@ without consuming any input.
 lookAhead :: GenParser tok st a -> GenParser tok st a
-lookAhead p = do
-    state <- getParserState
-    x <- p'
-    _ <- setParserState state
-    return x
-  where p' = Parser $ \ state -> case runP p state of
-          Consumed ok@Ok {} -> Empty ok
-          reply -> reply
+lookAhead p = Parser $ \ state -> case runP p state of
+  Consumed (Ok r _ _) -> Empty $ Ok r state $ unknownError state
+  reply -> reply
 
 {- | The parser @token showTok posFromTok testTok@ accepts a token @t@
 with result @x@ when the function @testTok t@ returns @'Just' x@. The
