@@ -57,7 +57,7 @@ optionMaybe p = option Nothing (fmap Just p)
 It only fails if @p@ fails after consuming input. It discards the result
 of @p@. -}
 optional :: GenParser tok st a -> GenParser tok st ()
-optional p = p >> return () <|> return ()
+optional p = () <$ p <|> return ()
 
 {- | @between open close p@ parses @open@, followed by @p@ and @close@.
 Returns the value returned by @p@.
@@ -94,7 +94,7 @@ by @sep@. Returns a list of values returned by @p@. -}
 sepBy1 :: GenParser tok st a -> GenParser tok st sep -> GenParser tok st [a]
 sepBy1 p sep = do
   x <- p
-  xs <- many (sep >> p)
+  xs <- many (sep *> p)
   return (x : xs)
 
 {- | @sepEndBy1 p sep@ parses /one/ or more occurrences of @p@,
@@ -242,7 +242,7 @@ Note the overlapping parsers @anyChar@ and @string \"<!--\"@, and
 therefore the use of the 'try' combinator. -}
 manyTill :: GenParser tok st a -> GenParser tok st end -> GenParser tok st [a]
 manyTill p end = scan where
-  scan = end >> return [] <|> do
+  scan = [] <$ end <|> do
     x <- p
     xs <- scan
     return (x : xs)
