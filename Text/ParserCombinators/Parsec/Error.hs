@@ -14,15 +14,12 @@ Parse errors
 module Text.ParserCombinators.Parsec.Error
                   ( Message (SysUnExpect, UnExpect, Expect, Message)
                   , messageString, messageCompare, messageEq
-
                   , ParseError, errorPos, errorMessages, errorIsUnknown
                   , showErrorMessages
-
                   , newErrorMessage, newErrorUnknown
                   , addErrorMessage, setErrorPos, setErrorMessage
                   , mergeError
-                  )
-                  where
+                  ) where
 
 
 import Prelude

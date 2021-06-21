@@ -12,19 +12,29 @@ Commonly used character parsers.
 --------------------------------------------------------------------------- -}
 
 module Text.ParserCombinators.Parsec.Char
-                  ( CharParser
-                  , spaces, space
-                  , newline, tab
-                  , upper, lower, alphaNum, letter
-                  , digit, hexDigit, octDigit
-                  , char, string
-                  , anyChar, oneOf, noneOf
-                  , satisfy
-                  ) where
+  ( CharParser
+  , alphaNum
+  , anyChar
+  , char
+  , digit
+  , hexDigit
+  , letter
+  , lower
+  , newline
+  , noneOf
+  , octDigit
+  , oneOf
+  , satisfy
+  , space
+  , spaces
+  , string
+  , tab
+  , upper
+  ) where
 
-import Prelude
 import Data.Char
-import Text.ParserCombinators.Parsec.Pos ( updatePosChar, updatePosString )
+
+import Text.ParserCombinators.Parsec.Pos (updatePosChar, updatePosString)
 import Text.ParserCombinators.Parsec.Prim
 
 {- ---------------------------------------------------------
@@ -123,7 +133,7 @@ supplied function @f@ returns 'True'. Returns the character that is
 actually parsed.
 
 >  digit     = satisfy isDigit
->  oneOf cs  = satisfy (\c -> c `elem` cs) -}
+>  oneOf cs  = satisfy (`elem` cs) -}
 satisfy :: (Char -> Bool) -> CharParser st Char
 satisfy f = tokenPrim (\ c -> show [c])
                                 (\ pos c _ -> updatePosChar pos c)

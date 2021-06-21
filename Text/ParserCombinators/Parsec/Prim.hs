@@ -13,37 +13,55 @@ The primitive parser combinators.
 --------------------------------------------------------------------------- -}
 
 module Text.ParserCombinators.Parsec.Prim
-                   ( -- operators: label a parser, alternative
-                     (<?>), (<|>), (*>), (<*), (<*>), (<$>), (<$)
+  ( -- operators: label a parser, alternative
+    (*>)
+  , (<$)
+  , (<$>)
+  , (<*)
+  , (<*>)
+  , (<?>)
+  , (<|>)
+    -- basic types
+  , GenParser
+  , Parser
+  , parse
+  , parseFromFile
+  , parseTest
+  , runParser
+    -- primitive parsers
+  , label
+  , labels
+  , lookAhead
+  , pzero
+  , token
+  , tokenPrim
+  , tokenPrimEx
+  , tokens
+  , try
+  , unexpected
+    -- primitive because of space behaviour
+  , many
+  , skipMany
+    -- user state manipulation
+  , getState
+  , setState
+  , updateState
+    -- state manipulation
+  , State (..)
+  , getInput
+  , getParserState
+  , getPosition
+  , setInput
+  , setParserState
+  , setPosition
+  ) where
 
-                   -- basic types
-                   , Parser, GenParser
-                   , runParser, parse, parseFromFile, parseTest
-
-                   {- primitive parsers:
-                   instance Functor Parser     : fmap
-                   instance Monad Parser       : return, >>=, fail
-                   instance MonadPlus Parser   : mzero (pzero), mplus (<|>) -}
-                   , token, tokens, tokenPrim, tokenPrimEx
-                   , try, label, labels, lookAhead, unexpected, pzero
-
-                   -- primitive because of space behaviour
-                   , many, skipMany
-
-                   -- user state manipulation
-                   , getState, setState, updateState
-
-                   -- state manipulation
-                   , getPosition, setPosition
-                   , getInput, setInput
-                   , State (..), getParserState, setParserState
-                 ) where
-
-import Prelude
-import Text.ParserCombinators.Parsec.Pos
 import Text.ParserCombinators.Parsec.Error
+import Text.ParserCombinators.Parsec.Pos
+
 import Control.Applicative
 import Control.Monad
+
 #if __GLASGOW_HASKELL__ >= 801
 import Control.Monad.Fail
 #endif
@@ -53,7 +71,6 @@ infix 0 <?>
 {- | The parser @p <?> msg@ behaves as parser @p@, but whenever the
 parser @p@ fails /without consuming any input/, it replaces expect
 error messages with the expect error message @msg@.
-
 This is normally used at the end of a set alternatives where we want
 to return an error message in terms of a higher level construct
 rather than returning all possible characters. For example, if the

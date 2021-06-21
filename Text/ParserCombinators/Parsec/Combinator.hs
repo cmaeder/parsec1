@@ -12,22 +12,31 @@ Commonly used generic combinators
 --------------------------------------------------------------------------- -}
 
 module Text.ParserCombinators.Parsec.Combinator
-                        ( choice
-                        , count
-                        , between
-                        , option, optionMaybe, optional
-                        , skipMany1
-                        , many1
-                        , sepBy, sepBy1
-                        , endBy, endBy1
-                        , sepEndBy, sepEndBy1
-                        , chainl, chainl1
-                        , chainr, chainr1
-                        , eof, notFollowedBy
-
-                        -- tricky combinators
-                        , manyTill, lookAhead, anyToken
-                        ) where
+  ( between
+  , chainl
+  , chainl1
+  , chainr
+  , chainr1
+  , choice
+  , count
+  , endBy
+  , endBy1
+  , eof
+  , many1
+  , notFollowedBy
+  , option
+  , optionMaybe
+  , optional
+  , sepBy
+  , sepBy1
+  , sepEndBy
+  , sepEndBy1
+  , skipMany1
+    -- tricky combinators
+  , anyToken
+  , lookAhead
+  , manyTill
+  ) where
 
 import Control.Monad
 import Text.ParserCombinators.Parsec.Prim
