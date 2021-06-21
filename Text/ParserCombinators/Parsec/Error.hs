@@ -12,18 +12,26 @@ Parse errors
 --------------------------------------------------------------------------- -}
 
 module Text.ParserCombinators.Parsec.Error
-                  ( Message (SysUnExpect, UnExpect, Expect, Message)
-                  , messageString, messageCompare, messageEq
-                  , ParseError, errorPos, errorMessages, errorIsUnknown
-                  , showErrorMessages
-                  , newErrorMessage, newErrorUnknown
-                  , addErrorMessage, setErrorPos, setErrorMessage
-                  , mergeError
-                  ) where
+  ( Message (SysUnExpect, UnExpect, Expect, Message)
+  , ParseError
+  , addErrorMessage
+  , errorIsUnknown
+  , errorMessages
+  , errorPos
+  , mergeError
+  , messageCompare
+  , messageEq
+  , messageString
+  , newErrorMessage
+  , newErrorUnknown
+  , setErrorMessage
+  , setErrorPos
+  , showErrorMessages
+  ) where
 
 
-import Prelude
 import Data.List (nub, sortBy)
+
 import Text.ParserCombinators.Parsec.Pos
 
 {- | This abstract data type represents parse error messages. There are
@@ -92,37 +100,30 @@ data ParseError = ParseError !SourcePos [Message] deriving Eq
 
 -- | Extracts the source position from the parse error
 errorPos :: ParseError -> SourcePos
-errorPos (ParseError pos _msgs)
-    = pos
+errorPos (ParseError pos _msgs) = pos
 
 -- | Extracts the list of error messages from the parse error
 errorMessages :: ParseError -> [Message]
-errorMessages (ParseError _pos msgs)
-    = sortBy messageCompare msgs
+errorMessages (ParseError _pos msgs) = sortBy messageCompare msgs
 
 errorIsUnknown :: ParseError -> Bool
-errorIsUnknown (ParseError _pos msgs)
-    = null msgs
+errorIsUnknown (ParseError _pos msgs) = null msgs
 
 
 {- ---------------------------------------------------------
 Create parse errors
 --------------------------------------------------------- -}
 newErrorUnknown :: SourcePos -> ParseError
-newErrorUnknown pos
-    = ParseError pos []
+newErrorUnknown pos = ParseError pos []
 
 newErrorMessage :: Message -> SourcePos -> ParseError
-newErrorMessage msg pos
-    = ParseError pos [msg]
+newErrorMessage msg pos = ParseError pos [msg]
 
 addErrorMessage :: Message -> ParseError -> ParseError
-addErrorMessage msg (ParseError pos msgs)
-    = ParseError pos (msg : msgs)
+addErrorMessage msg (ParseError pos msgs) = ParseError pos (msg : msgs)
 
 setErrorPos :: SourcePos -> ParseError -> ParseError
-setErrorPos pos (ParseError _ msgs)
-    = ParseError pos msgs
+setErrorPos pos (ParseError _ msgs) = ParseError pos msgs
 
 setErrorMessage :: Message -> ParseError -> ParseError
 setErrorMessage msg (ParseError pos msgs)
@@ -145,12 +146,10 @@ mergeError e1@(ParseError pos1 msgs1) e2@(ParseError pos2 msgs2)
 Show Parse Errors
 --------------------------------------------------------- -}
 instance Show ParseError where
-  show err
-    = show (errorPos err) ++ ":" ++
+  show err = show (errorPos err) ++ ":" ++
       showErrorMessages "or" "unknown parse error"
                         "expecting" "unexpected" "end of input"
                        (errorMessages err)
-
 
 -- | Language independent show function
 showErrorMessages ::
