@@ -1,5 +1,5 @@
 name:           parsec1
-version:        1.0.0.8
+version:        1.0.0.9
 license:        BSD3
 license-file:   LICENSE
 maintainer:     chr.maeder@web.de
@@ -32,3 +32,5 @@ library
   build-depends:    base < 5
   other-extensions: CPP
   default-language: Haskell98
+
+extra-source-files: ChangeLog.md
