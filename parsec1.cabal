@@ -15,7 +15,7 @@ description:
     preserve its simplicity and portability.
 
 build-type:     Simple
-cabal-version:      >= 1.6
+cabal-version:      >= 1.10
 
 source-repository head
   type: git
@@ -31,3 +31,4 @@ library
     Text.ParserCombinators.Parsec
   build-depends:    base < 5
   other-extensions: CPP
+  default-language: Haskell98
