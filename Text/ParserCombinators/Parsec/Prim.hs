@@ -235,7 +235,7 @@ instance Monad (GenParser tok st) where
   return = parsecReturn
   (>>=) = parsecBind
   (>>) = (*>)
-#if !MIN_VERSION_base(4,13,0)
+#if !MIN_VERSION_base (4, 13, 0)
   fail = parsecFail
 #endif
 
