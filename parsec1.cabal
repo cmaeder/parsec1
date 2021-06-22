@@ -2,6 +2,7 @@ name:           parsec1
 version:        1.0.0.9
 license:        BSD3
 license-file:   LICENSE
+author:         Daan Leijen
 maintainer:     chr.maeder@web.de
 category:       Parsing
 synopsis:       Portable monadic parser combinators
