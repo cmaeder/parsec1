@@ -11,6 +11,11 @@
 
 - refactored code (hlint, scan, stylish, -Wall)
 
+- added Eq instance to ParseError
+
+- changed Maintainer from Antoine Latter <aslatter@gmail.com> to
+  Christian Maeder <chr.maeder@web.de>
+
 ### 1.0.0.7
 
 - added MonadFail instance for ghc-8.8

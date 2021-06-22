@@ -3,7 +3,7 @@ Module      :  Text.ParserCombinators.Parsec
 Copyright   :  (c) Daan Leijen 1999-2001
 License     :  BSD-style (see the file libraries/parsec/LICENSE)
 
-Maintainer  :  Antoine Latter <aslatter@gmail.com>
+Maintainer  :  Christian Maeder <chr.maeder@web.de>
 Stability   :  provisional
 Portability :  portable
 

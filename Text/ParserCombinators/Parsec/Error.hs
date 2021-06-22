@@ -1,9 +1,9 @@
 {- |
 Module      :  Text.ParserCombinators.Parsec.Error
 Copyright   :  (c) Daan Leijen 1999-2001
-License     :  BSD-style (see the file libraries/parsec/LICENSE)
+License     :  BSD-style (see the file LICENSE)
 
-Maintainer  :  Antoine Latter <aslatter@gmail.com>
+Maintainer  :  Christian Maeder <chr.maeder@web.de>
 Stability   :  provisional
 Portability :  portable
 
