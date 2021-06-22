@@ -3,7 +3,7 @@
 - reexported the operators (*>), (<$), (<$>), (<*), (<*>) to avoid
   import of Control.Applicative for versions below ghc-7.10
 
-- fixed parsec bug 6 for lookAhead and added test case
+- fixed parsec bug 6 for lookAhead
 
 - added ChangeLog.md
 
